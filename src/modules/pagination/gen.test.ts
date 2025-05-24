@@ -1,0 +1,241 @@
+import { generatePages } from "./gen";
+
+const testCases = [
+  {
+    option: { count: 5, bias: "right" },
+    cases: [
+      { page: 1, total: 0, expected: [] },
+      { page: 1, total: 1, expected: [1] },
+      { page: 1, total: 2, expected: [1, 2] },
+      { page: 1, total: 3, expected: [1, 2, 3] },
+      { page: 1, total: 4, expected: [1, 2, 3, 4] },
+      { page: 1, total: 5, expected: [1, 2, 3, 4, 5] },
+      { page: 2, total: 5, expected: [1, 2, 3, 4, 5] },
+      { page: 3, total: 5, expected: [1, 2, 3, 4, 5] },
+      { page: 4, total: 5, expected: [1, 2, 3, 4, 5] },
+      { page: 5, total: 5, expected: [1, 2, 3, 4, 5] },
+    ],
+  },
+  {
+    option: { count: 5, bias: "right" },
+    cases: [
+      { page: 1, total: 6, expected: [1, 2, 3, "right", 6] },
+      { page: 2, total: 6, expected: [1, 2, 3, "right", 6] },
+      { page: 3, total: 6, expected: [1, "left", 3, "right", 6] },
+      { page: 4, total: 6, expected: [1, "left", 4, 5, 6] },
+      { page: 5, total: 6, expected: [1, "left", 4, 5, 6] },
+      { page: 6, total: 6, expected: [1, "left", 4, 5, 6] },
+
+      { page: 1, total: 7, expected: [1, 2, 3, "right", 7] },
+      { page: 2, total: 7, expected: [1, 2, 3, "right", 7] },
+      { page: 3, total: 7, expected: [1, "left", 3, "right", 7] },
+      { page: 4, total: 7, expected: [1, "left", 4, "right", 7] },
+      { page: 5, total: 7, expected: [1, "left", 5, 6, 7] },
+      { page: 6, total: 7, expected: [1, "left", 5, 6, 7] },
+      { page: 7, total: 7, expected: [1, "left", 5, 6, 7] },
+    ],
+  },
+  {
+    option: { count: 5, bias: "left" },
+    cases: [
+      { page: 1, total: 6, expected: [1, 2, 3, "right", 6] },
+      { page: 2, total: 6, expected: [1, 2, 3, "right", 6] },
+      { page: 3, total: 6, expected: [1, 2, 3, "right", 6] },
+      { page: 4, total: 6, expected: [1, "left", 4, "right", 6] },
+      { page: 5, total: 6, expected: [1, "left", 4, 5, 6] },
+      { page: 6, total: 6, expected: [1, "left", 4, 5, 6] },
+
+      { page: 1, total: 7, expected: [1, 2, 3, "right", 7] },
+      { page: 2, total: 7, expected: [1, 2, 3, "right", 7] },
+      { page: 3, total: 7, expected: [1, 2, 3, "right", 7] },
+      { page: 4, total: 7, expected: [1, "left", 4, "right", 7] },
+      { page: 5, total: 7, expected: [1, "left", 5, "right", 7] },
+      { page: 6, total: 7, expected: [1, "left", 5, 6, 7] },
+      { page: 7, total: 7, expected: [1, "left", 5, 6, 7] },
+    ],
+  },
+  {
+    option: { count: 8, bias: "right" },
+    cases: [
+      { page: 1, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 2, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 3, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 4, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 5, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 6, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 7, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 8, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 9, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+
+      { page: 1, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 2, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 3, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 4, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 5, total: 10, expected: [1, "left", 4, 5, 6, 7, "right", 10] },
+      { page: 6, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 7, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 8, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 9, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 10, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+
+      { page: 1, total: 100, expected: [1, 2, 3, 4, 5, 6, "right", 100] },
+      { page: 50, total: 100, expected: [1, "left", 49, 50, 51, 52, "right", 100] },
+      { page: 100, total: 100, expected: [1, "left", 95, 96, 97, 98, 99, 100] },
+    ],
+  },
+  {
+    option: { count: 8, bias: "left" },
+    cases: [
+      { page: 1, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 2, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 3, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 4, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 5, total: 9, expected: [1, 2, 3, 4, 5, 6, "right", 9] },
+      { page: 6, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 7, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 8, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+      { page: 9, total: 9, expected: [1, "left", 4, 5, 6, 7, 8, 9] },
+
+      { page: 1, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 2, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 3, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 4, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 5, total: 10, expected: [1, 2, 3, 4, 5, 6, "right", 10] },
+      { page: 6, total: 10, expected: [1, "left", 4, 5, 6, 7, "right", 10] },
+      { page: 7, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 8, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 9, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+      { page: 10, total: 10, expected: [1, "left", 5, 6, 7, 8, 9, 10] },
+
+      { page: 1, total: 100, expected: [1, 2, 3, 4, 5, 6, "right", 100] },
+      { page: 50, total: 100, expected: [1, "left", 48, 49, 50, 51, "right", 100] },
+      { page: 100, total: 100, expected: [1, "left", 95, 96, 97, 98, 99, 100] },
+    ],
+  },
+  {
+    option: { range: 3, truncate: false, distanceFrom: "edge" },
+    cases: [
+      { page: 1, total: 0, expected: [] },
+      { page: 1, total: 1, expected: [1] },
+      { page: 1, total: 2, expected: [1, 2] },
+      { page: 1, total: 3, expected: [1, 2, 3] },
+      { page: 3, total: 3, expected: [1, 2, 3] },
+      { page: 1, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 3, total: 100, expected: [1, 2, 3, 4, "right", 100] },
+      { page: 4, total: 100, expected: [1, "left", 3, 4, 5, "right", 100] },
+      { page: 97, total: 100, expected: [1, "left", 96, 97, 98, "right", 100] },
+      { page: 98, total: 100, expected: [1, "left", 97, 98, 99, 100] },
+      { page: 99, total: 100, expected: [1, "left", 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 98, 99, 100] },
+    ],
+  },
+  {
+    option: { range: 5, truncate: false, distanceFrom: "edge" },
+    cases: [
+      { page: 1, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 3, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 4, total: 100, expected: [1, 2, 3, 4, 5, 6, "right", 100] },
+      { page: 5, total: 100, expected: [1, "left", 3, 4, 5, 6, 7, "right", 100] },
+      { page: 96, total: 100, expected: [1, "left", 94, 95, 96, 97, 98, "right", 100] },
+      { page: 97, total: 100, expected: [1, "left", 95, 96, 97, 98, 99, 100] },
+      { page: 98, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+      { page: 99, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+    ],
+  },
+  {
+    option: { range: 3, truncate: true, distanceFrom: "edge" },
+    cases: [
+      { page: 1, total: 3, expected: [1, 2, 3] },
+      { page: 3, total: 3, expected: [1, 2, 3] },
+      { page: 1, total: 100, expected: [1, 2, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 3, total: 100, expected: [1, 2, 3, 4, "right", 100] },
+      { page: 4, total: 100, expected: [1, "left", 3, 4, 5, "right", 100] },
+      { page: 97, total: 100, expected: [1, "left", 96, 97, 98, "right", 100] },
+      { page: 98, total: 100, expected: [1, "left", 97, 98, 99, 100] },
+      { page: 99, total: 100, expected: [1, "left", 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 99, 100] },
+    ],
+  },
+  {
+    option: { range: 5, truncate: true, distanceFrom: "edge" },
+    cases: [
+      { page: 1, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, 4, "right", 100] },
+      { page: 3, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 4, total: 100, expected: [1, 2, 3, 4, 5, 6, "right", 100] },
+      { page: 5, total: 100, expected: [1, "left", 3, 4, 5, 6, 7, "right", 100] },
+      { page: 96, total: 100, expected: [1, "left", 94, 95, 96, 97, 98, "right", 100] },
+      { page: 97, total: 100, expected: [1, "left", 95, 96, 97, 98, 99, 100] },
+      { page: 98, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+      { page: 99, total: 100, expected: [1, "left", 97, 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 98, 99, 100] },
+    ],
+  },
+  {
+    option: { range: 3, truncate: false, distanceFrom: "center" },
+    cases: [
+      { page: 1, total: 3, expected: [1, 2, "right", 3] },
+      { page: 3, total: 3, expected: [1, "left", 2, 3] },
+      { page: 1, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 3, total: 100, expected: [1, "left", 2, 3, 4, "right", 100] },
+      { page: 98, total: 100, expected: [1, "left", 97, 98, 99, "right", 100] },
+      { page: 99, total: 100, expected: [1, "left", 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 98, 99, 100] },
+    ],
+  },
+  {
+    option: { range: 5, truncate: false, distanceFrom: "center" },
+    cases: [
+      { page: 1, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 3, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 4, total: 100, expected: [1, "left", 2, 3, 4, 5, 6, "right", 100] },
+      { page: 97, total: 100, expected: [1, "left", 95, 96, 97, 98, 99, "right", 100] },
+      { page: 98, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+      { page: 99, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+    ],
+  },
+  {
+    option: { range: 3, truncate: true, distanceFrom: "center" },
+    cases: [
+      { page: 1, total: 3, expected: [1, 2, "right", 3] },
+      { page: 3, total: 3, expected: [1, "left", 2, 3] },
+      { page: 1, total: 100, expected: [1, 2, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 3, total: 100, expected: [1, "left", 2, 3, 4, "right", 100] },
+      { page: 98, total: 100, expected: [1, "left", 97, 98, 99, "right", 100] },
+      { page: 99, total: 100, expected: [1, "left", 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 99, 100] },
+    ],
+  },
+  {
+    option: { range: 5, truncate: true, distanceFrom: "center" },
+    cases: [
+      { page: 1, total: 100, expected: [1, 2, 3, "right", 100] },
+      { page: 2, total: 100, expected: [1, 2, 3, 4, "right", 100] },
+      { page: 3, total: 100, expected: [1, 2, 3, 4, 5, "right", 100] },
+      { page: 4, total: 100, expected: [1, "left", 2, 3, 4, 5, 6, "right", 100] },
+      { page: 97, total: 100, expected: [1, "left", 95, 96, 97, 98, 99, "right", 100] },
+      { page: 98, total: 100, expected: [1, "left", 96, 97, 98, 99, 100] },
+      { page: 99, total: 100, expected: [1, "left", 97, 98, 99, 100] },
+      { page: 100, total: 100, expected: [1, "left", 98, 99, 100] },
+    ],
+  },
+] as const;
+
+describe("generatePages", () => {
+  testCases.forEach(({ option, cases }) => {
+    cases.forEach(({ page, total, expected }) => {
+      it(`option: ${JSON.stringify(option)}, page: ${page}, total: ${total}, expected: [${expected.join(", ")}]`, () => {
+        const pages = generatePages(page, total, option);
+        expect(pages).toEqual(expected);
+      });
+    });
+  });
+});
