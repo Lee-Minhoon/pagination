@@ -1,54 +1,59 @@
-# React + TypeScript + Vite
+# Pagination
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Description
 
-Currently, two official plugins are available:
+Pagination algorithm that generates page ranges with ellipsis indicators when necessary.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Parameters
 
-## Expanding the ESLint configuration
+| Option         | Type                   | Default   | Description                                                                                                                                    |
+| -------------- | ---------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `range`        | `number`               | 3         | Number of pages to show around the current page. Ignored if `count` is provided.                                                               |
+| `truncate`     | `boolean`              | false     | When using `range`, whether to truncate (collapse) the page range near edges to condense the pagination display.                               |
+| `distanceFrom` | `"edge"` \| `"center"` | edge      | When using `range`, defines the positioning of the page range: aligned to the start/end edges `"edge"` or centered on current page `"center"`. |
+| `count`        | `number`               | undefined | Maximum number of page indicators to display. When set, `count` takes precedence over `range` and controls visible pagination length.          |
+| `bias`         | `"left"` \| `"right"`  | `"right"` | When using `count`, determines whether the current page range is biased toward the left or right side of the pagination.                       |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Example
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
+```typescript
+const pages = generatePages(1, 100, {
+  range: 3,
+  truncate: false,
+  distanceFrom: "edge",
 });
-```
+// [1, 2, 3, "right", 100]
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
-    ...reactDom.configs.recommended.rules,
-  },
+const pages = generatePages(1, 100, {
+  range: 3,
+  truncate: true,
+  distanceFrom: "edge",
 });
+// [1, 2, "right", 100]
+
+const pages = generatePages(3, 100, {
+  range: 3,
+  truncate: false,
+  distanceFrom: "edge",
+});
+// [1, 2, 3, 4, "right", 100]
+
+const pages = generatePages(3, 100, {
+  range: 3,
+  truncate: false,
+  distanceFrom: "center",
+});
+// [[1, "left", 2, 3, 4, "right", 100]
+
+const pages = generatePages(5, 10, {
+  count: 5,
+  bias: "right",
+});
+// [1, "left", 4, 5, 6, 7, "right", 10]
+
+const pages = generatePages(5, 10, {
+  count: 5,
+  bias: "left",
+});
+// [1, 2, 3, 4, 5, 6, "right", 10]
 ```
